@@ -18,15 +18,20 @@ CREATE TABLE Admin (
         PRIMARY KEY (adminID)
         );
 
+insert into Admin values(1 , 'momen' , 'mostafa' , '01119738864' , 'momenmostafa585@gmail.com' ,'12345') ;
+
 
 CREATE TABLE Train (
         trainID int NOT NULL,
         trainName varchar(50) NOT NULL,
         trainNumber int NOT NULL,
         adminID int,
+		numberOfSeats int ,
         PRIMARY KEY (trainID),
         FOREIGN KEY (adminID) REFERENCES Admin(adminID) ON DELETE set null
 );
+
+insert into Train values (1 , 'masr eskendria', 1905 , 1) ;
 
 CREATE TABLE Trip (
         tripID int NOT NULL,
@@ -38,6 +43,7 @@ CREATE TABLE Trip (
         arrivialTime varchar(50) NOT NULL,
         availableSeats int NOT NULL,
         adminID int ,
+
         PRIMARY KEY (tripID),
 
         FOREIGN KEY (trainID) REFERENCES Train(trainID) ON DELETE CASCADE,
@@ -45,7 +51,9 @@ CREATE TABLE Trip (
         
 		);
 
-CREATE TABLE Booking (
+insert into Trip values(1 , 1 , 'cairo' , 'alexandria' , '23/5/2023' , '5.20 pm' ,'7.35 pm' , 30 ,1)
+
+        CREATE TABLE Booking (
         BookingID int NOT NULL,
         CustomerID int NOT NULL,
         tripID int NOT NULL,
@@ -54,22 +62,15 @@ CREATE TABLE Booking (
         FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID) ON DELETE CASCADE,
         FOREIGN KEY (tripID) REFERENCES Trip(tripID) ON DELETE CASCADE
         );
-        
-CREATE TABLE BookingDetails (
+
+        CREATE TABLE BookingDetails (
         BookingID int NOT NULL,
         seatNumber int NOT NULL,
         FOREIGN KEY (BookingID) REFERENCES Booking(BookingID) ON DELETE CASCADE
         );
 
-        CREATE TABLE Seat (
-        seatNumber int NOT NULL,
-        trainID int NOT NULL,
-        avaliable varchar(50) NOT NULL,
-        PRIMARY KEY (seatNumber),
-        FOREIGN KEY (trainID) REFERENCES Train(trainID) ON DELETE CASCADE
-        );
 
-CREATE TABLE Cancellation (
+        CREATE TABLE Cancellation (
         CancellationID int NOT NULL,
         BookingID int NOT NULL,
         CancellationDate varchar(10) NOT NULL,
