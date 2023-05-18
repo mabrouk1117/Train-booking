@@ -1,3 +1,5 @@
+package org.example;
+
 import java.sql.*;
 import java.util.Scanner;
 
@@ -7,11 +9,16 @@ public class Menue {
     private logIn login;
     private SignUp signUp;
 
+    private Trip trip;
+    private Train train;
+
     public Menue(Connection connection) {
         this.connection = connection;
         scanner = new Scanner(System.in);
         login = new logIn(connection);
         signUp = new SignUp(connection);
+        train = new Train(connection);
+        trip = new Trip();
     }
 
     public void displayMenu() {
@@ -50,8 +57,31 @@ public class Menue {
 
                         if (loginTypeChoice == 1) {
                             login.loginCustomer(scanner);
+                            //User menu
                         } else if (loginTypeChoice == 2) {
+                            //Admin Menu
                             login.loginAdmin(scanner);
+                            System.out.println("1 if you want to Edit Train");
+                            System.out.println("2 if you want to Add Train");
+                            System.out.println("3 if You want to Edit trip");
+                            System.out.println("4 if You want to Add trip");
+                            int c = scanner.nextInt();
+                            switch (c){
+                                case 1:
+                                    train.Edittrain(scanner);
+                                    break;
+                                case 2:
+                                    train.AddTrain(scanner);
+                                    break;
+                                case 3:
+                                    trip.Edit_a_Trip();
+                                    break;
+                                case 4:
+                                    trip.Add_a_Trip();
+                                    break;
+                                default:
+                                    System.out.println("Invalid choice");
+                            }
                         } else {
                             System.out.println("Invalid choice. Please try again.");
                         }

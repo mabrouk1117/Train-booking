@@ -1,3 +1,4 @@
+package org.example;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -11,7 +12,7 @@ import java.time.LocalTime;
 public class Trip
 {
     public Trip(){}
-    public static void Add_a_Trip()
+    public void Add_a_Trip()
     {
         String url = "jdbc:mysql://localhost:3306/...";           //replace ... with the name of your DB
         String username = "...";            //replace ... with ur username on your MySQL
@@ -329,5 +330,4 @@ public class Trip
         statement.close();
     }
 }
-
 

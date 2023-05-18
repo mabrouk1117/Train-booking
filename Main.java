@@ -1,19 +1,21 @@
+package org.example;
 import java.sql.*;
 import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-        String url = "jdbc:mysql://localhost:3306/my_schema";
+        String url = "jdbc:mysql://localhost:3306/bookingtrain";
         String username = "root";
-        String password = "1234";
+        String password = "123456";
 
         try {
             Connection connection = DriverManager.getConnection(url, username, password);
-            Menue menu = new Menue(connection);
-            menu.displayMenu();
+            Menue m = new Menue(connection);
+            m.displayMenu();
             connection.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 }
+
