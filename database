@@ -1,18 +1,30 @@
-CREATE TABLE `User` (
-  `userID` int NOT NULL,
+CREATE TABLE `Customer` (
+  `CustomerID` int NOT NULL,
   `firstName` varchar(50) NOT NULL,
   `lastName` varchar(50) NOT NULL,
   `phoneNumber` varchar(50) NOT NULL,
   `Email` varchar(50) NOT NULL,
   `password` varchar(50) NOT NULL,
-  `userType` varchar(50) NOT NULL,
-  PRIMARY KEY (`userID`)
+  PRIMARY KEY (`CustomerID`)
 );
+CREATE TABLE `Admin` (
+  `adminID` int NOT NULL,
+   `firstName` varchar(50) NOT NULL,
+  `lastName` varchar(50) NOT NULL,
+  `phoneNumber` varchar(50) NOT NULL,
+  `Email` varchar(50) NOT NULL,
+  `password` varchar(50) NOT NULL,
+  PRIMARY KEY (`adminID`)
+);
+
+
 CREATE TABLE `Train` (
   `trainID` int NOT NULL,
   `trainName` varchar(50) NOT NULL,
-  `numberOfSeats` int NOT NULL,
-  PRIMARY KEY (`trainID`)
+  `trainNumber` int NOT NULL,
+  `adminID` int,
+  PRIMARY KEY (`trainID`),
+  FOREIGN KEY (`adminID`) REFERENCES `Admin`(`adminID`) ON DELETE CASCADE
 );
 
 CREATE TABLE `Trip` (
@@ -21,49 +33,42 @@ CREATE TABLE `Trip` (
   `originStation` varchar(50) NOT NULL,
   `destinationStation` varchar(50) NOT NULL,
   `DepartureDate` varchar(50) NOT NULL,
-  `DepartureTime` varchar(50) NOT NULL,
-  `arrivalTime` varchar(50) NOT NULL,
+  `DepratureTime` varchar(50) NOT NULL,
+  `arrivialTime` varchar(50) NOT NULL,
   `availableSeats` int NOT NULL,
-  FOREIGN KEY (`trainID`) REFERENCES `Train`(`trainID`) ON UPDATE CASCADE,
+  `adminID` int,
   PRIMARY KEY (`tripID`),
-  INDEX (`trainID`)
-);
-
-CREATE TABLE `Seat` (
-  `seatNumber` int NOT NULL,
-  `trainID` int NOT NULL,
-  `seatLocation` varchar(50) NOT NULL,
-  `seatType` varchar(50) NOT NULL,
-  `seatClass` varchar(50) NOT NULL,
-  `status` varchar(50) NOT NULL,
-  FOREIGN KEY (`trainID`) REFERENCES `Train`(`trainID`) ON UPDATE CASCADE,
-  PRIMARY KEY (`seatNumber`),
-  INDEX (`trainID`)
+  FOREIGN KEY (`trainID`) REFERENCES `Train`(`trainID`) ON DELETE CASCADE,
+  FOREIGN KEY (`adminID`) REFERENCES `Admin`(`adminID`) ON DELETE CASCADE
 );
 
 CREATE TABLE `Booking` (
   `BookingID` int NOT NULL,
-  `customerID` int NOT NULL,
+  `CustomerID` int NOT NULL,
   `tripID` int NOT NULL,
-  `bookingDate` varchar(50) NOT NULL,
-  `numOfSeat` int NOT NULL,
-  FOREIGN KEY (`customerID`) REFERENCES `User`(`userID`) ON UPDATE CASCADE,
-  FOREIGN KEY (`tripID`) REFERENCES `Trip`(`tripID`) ON UPDATE CASCADE,
+  `bookingData` varchar(50) NOT NULL,
   PRIMARY KEY (`BookingID`),
-  INDEX (`customerID`, `tripID`)
-);
-
-CREATE TABLE `Station` (
-  `stationID` int NOT NULL,
-  `stationName` varchar(50) NOT NULL,
-  `location` varchar(50) NOT NULL,
-  PRIMARY KEY (`stationID`)
+  FOREIGN KEY (`CustomerID`) REFERENCES `Customer`(`CustomerID`) ON DELETE CASCADE,
+  FOREIGN KEY (`tripID`) REFERENCES `Trip`(`tripID`) ON DELETE CASCADE
 );
 
 CREATE TABLE `BookingDetails` (
   `BookingID` int NOT NULL,
   `seatNumber` int NOT NULL,
-  FOREIGN KEY (`BookingID`) REFERENCES `Booking`(`BookingID`) ON UPDATE CASCADE,
-  FOREIGN KEY (`seatNumber`) REFERENCES `Seat`(`seatNumber`) ON UPDATE CASCADE,
-  PRIMARY KEY (`BookingID`, `seatNumber`)
+  FOREIGN KEY (`BookingID`) REFERENCES `Booking`(`BookingID`) ON DELETE CASCADE
+);
+
+CREATE TABLE `Seat` (
+  `seatNumber` int NOT NULL,
+  `trainID` int NOT NULL,
+  `avaliable` varchar(50) NOT NULL,
+  PRIMARY KEY (`seatNumber`),
+  FOREIGN KEY (`trainID`) REFERENCES `Train`(`trainID`) ON DELETE CASCADE
+);
+
+CREATE TABLE `Cancellation` (
+  `CancellationID` int NOT NULL,
+  `BookingID` int NOT NULL,
+  `CancellationDate` varchar(10) NOT NULL,
+  PRIMARY KEY (`CancellationID`)
 );
