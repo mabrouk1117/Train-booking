@@ -57,7 +57,6 @@ insert into Trip values(1 , 1 , 'cairo' , 'alexandria' , '23/5/2023' , '5.20 pm'
         BookingID int NOT NULL,
         CustomerID int NOT NULL,
         tripID int NOT NULL,
-        bookingData varchar(50) NOT NULL,
         PRIMARY KEY (BookingID),
         FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID) ON DELETE CASCADE,
         FOREIGN KEY (tripID) REFERENCES Trip(tripID) ON DELETE CASCADE
