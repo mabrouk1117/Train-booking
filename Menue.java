@@ -1,4 +1,3 @@
-package org.example;
 
 import java.sql.*;
 import java.util.Scanner;
@@ -18,7 +17,7 @@ public class Menue {
         login = new logIn(connection);
         signUp = new SignUp(connection);
         train = new Train(connection);
-        trip = new Trip();
+        trip = new Trip(connection);
     }
 
     public void displayMenu() {
@@ -65,6 +64,7 @@ public class Menue {
                             System.out.println("2 if you want to Add Train");
                             System.out.println("3 if You want to Edit trip");
                             System.out.println("4 if You want to Add trip");
+                            System.out.println("4 if You want to delete a trip");
                             int c = scanner.nextInt();
                             switch (c){
                                 case 1:
@@ -74,10 +74,13 @@ public class Menue {
                                     train.AddTrain(scanner);
                                     break;
                                 case 3:
-                                    trip.Edit_a_Trip();
+                                    trip.Edit_a_Trip(scanner);
                                     break;
                                 case 4:
-                                    trip.Add_a_Trip();
+                                    trip.Add_a_Trip(scanner);
+                                    break;
+                                case 5:
+                                    trip.delete_a_trip(scanner);
                                     break;
                                 default:
                                     System.out.println("Invalid choice");
