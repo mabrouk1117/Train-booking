@@ -6,15 +6,16 @@ public class logIn {
         this.connection = connection;
     }
     public int loginCustomer(Scanner scanner) {
-        System.out.println("Enter your email:");
-        String email = scanner.nextLine();
+        System.out.println("Enter your ID:");
+        int ID = scanner.nextInt();
+        scanner.nextLine();
 
         System.out.println("Enter your password:");
         String password = scanner.nextLine();
         try {
-            String sql = "SELECT CustomerID FROM Customer WHERE Email = ? AND password = ?";
+            String sql = "SELECT CustomerID FROM Customer WHERE CustomerID = ? AND password = ?";
             PreparedStatement statement = connection.prepareStatement(sql);
-            statement.setString(1, email);
+            statement.setInt(1, ID);
             statement.setString(2, password);
             ResultSet resultSet = statement.executeQuery();
 
@@ -38,21 +39,22 @@ public class logIn {
         return -1;
     }
     public int loginAdmin(Scanner scanner) {
-        System.out.println("Enter your email:");
-        String email = scanner.nextLine();
+        System.out.println("Enter your ID:");
+        int ID = scanner.nextInt();
+        scanner.nextLine();
 
         System.out.println("Enter your password:");
         String password = scanner.nextLine();
         try {
-            String sql = "SELECT adminID FROM Admin WHERE Email = ? AND password = ?";
+            String sql = "SELECT AdminID FROM Admin WHERE AdminID = ? AND password = ?";
             PreparedStatement statement = connection.prepareStatement(sql);
-            statement.setString(1, email);
+            statement.setInt(1, ID);
             statement.setString(2, password);
             ResultSet resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
                 System.out.println("Login successful.");
-                int id=resultSet.getInt("CustomerID");
+                int id = resultSet.getInt("AdminID");
                 statement.close();
                 resultSet.close();
                 return id;
@@ -62,6 +64,8 @@ public class logIn {
                 resultSet.close();
                 return -1;
             }
+
+
         } catch (SQLException e) {
             e.printStackTrace();
         }

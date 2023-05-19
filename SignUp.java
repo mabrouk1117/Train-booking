@@ -1,6 +1,6 @@
-package org.example;
 import java.sql.*;
 import java.util.Scanner;
+
 
 public class SignUp {
     private Connection connection;
@@ -8,12 +8,47 @@ public class SignUp {
     public SignUp(Connection connection) {
         this.connection = connection;
     }
+    private boolean isValidcustomerID(int ID) throws SQLException{
+        if(ID<1000){
+            System.out.println("please enter long ID");
+            return true;
+        }
+        String sql = "SELECT CustomerID FROM customer Where CustomerID = ?";
+        PreparedStatement statement = connection.prepareStatement(sql);
+        statement.setInt(1,ID);
+        ResultSet resultSet = statement.executeQuery();
+        boolean res = resultSet.next();
+        if(res==true){
+            System.out.println("id exists already");
+        }
+        return res;
+    }
+    private boolean isValidadminID(int ID) throws SQLException{
+        if(ID<1000){
+            System.out.println("please enter long ID");
+            return true;
+        }
+        String sql = "SELECT adminID FROM Admin Where adminID = ?";
+        PreparedStatement statement = connection.prepareStatement(sql);
+        statement.setInt(1,ID);
+        ResultSet resultSet = statement.executeQuery();
+        boolean res = resultSet.next();
+        if(res==true){
+            System.out.println("id exists already");
+        }
+        return res;
+    }
 
     public void insertCustomer(Scanner scanner) {
         try {
             System.out.println("Enter the ID:");
             int id = scanner.nextInt();
             scanner.nextLine();
+            while(isValidcustomerID(id)) {
+                System.out.println("Enter the ID:");
+                id = scanner.nextInt();
+                scanner.nextLine();
+            }
 
             System.out.println("Enter the first name:");
             String firstName = scanner.nextLine();
@@ -56,6 +91,11 @@ public class SignUp {
             System.out.println("Enter the ID:");
             int id = scanner.nextInt();
             scanner.nextLine();
+            while(isValidadminID(id)) {
+                System.out.println("Enter the ID:");
+                id = scanner.nextInt();
+                scanner.nextLine();
+            }
 
             System.out.println("Enter the first name:");
             String firstName = scanner.nextLine();
