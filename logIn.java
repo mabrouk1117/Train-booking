@@ -1,4 +1,3 @@
-package org.example;
 import java.sql.*;
 import java.util.Scanner;
 public class logIn {
@@ -6,14 +5,14 @@ public class logIn {
     public logIn(Connection connection) {
         this.connection = connection;
     }
-    public void loginCustomer(Scanner scanner) {
+    public int loginCustomer(Scanner scanner) {
         System.out.println("Enter your email:");
         String email = scanner.nextLine();
 
         System.out.println("Enter your password:");
         String password = scanner.nextLine();
         try {
-            String sql = "SELECT * FROM Customer WHERE Email = ? AND password = ?";
+            String sql = "SELECT CustomerID FROM Customer WHERE Email = ? AND password = ?";
             PreparedStatement statement = connection.prepareStatement(sql);
             statement.setString(1, email);
             statement.setString(2, password);
@@ -21,16 +20,24 @@ public class logIn {
 
             if (resultSet.next()) {
                 System.out.println("Login successful.");
+                int id=resultSet.getInt("CustomerID");
+                statement.close();
+                resultSet.close();
+                return id;
             } else {
                 System.out.println("Invalid email or password. Please try again.");
+                statement.close();
+                resultSet.close();
+                return -1;
             }
-            statement.close();
-            resultSet.close();
+
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return -1;
     }
-    public void loginAdmin(Scanner scanner) {
+    public int loginAdmin(Scanner scanner) {
         System.out.println("Enter your email:");
         String email = scanner.nextLine();
 
@@ -45,14 +52,20 @@ public class logIn {
 
             if (resultSet.next()) {
                 System.out.println("Login successful.");
+                int id=resultSet.getInt("CustomerID");
+                statement.close();
+                resultSet.close();
+                return id;
             } else {
                 System.out.println("Invalid email or password. Please try again.");
+                statement.close();
+                resultSet.close();
+                return -1;
             }
-            statement.close();
-            resultSet.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return -1;
     }
 
 
