@@ -44,7 +44,7 @@ public class logIn {
         System.out.println("Enter your password:");
         String password = scanner.nextLine();
         try {
-            String sql = "SELECT * FROM Admin WHERE Email = ? AND password = ?";
+            String sql = "SELECT adminID FROM Admin WHERE Email = ? AND password = ?";
             PreparedStatement statement = connection.prepareStatement(sql);
             statement.setString(1, email);
             statement.setString(2, password);
