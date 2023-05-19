@@ -41,18 +41,21 @@ public class Train {
             String name = scanner.nextLine();
             System.out.println("Enter train number");
             int num = scanner.nextInt();
+            System.out.println("Enter number of seats");
+            int nos = scanner.nextInt();
             System.out.println("Enter admin ID");
             int adminID = scanner.nextInt();
             while (!isValidAdmin(adminID)){
                 System.out.println("Invalid ID please try again");
                 adminID = scanner.nextInt();
             }
-            String sql = "INSERT INTO Train (trainID, trainName, trainNumber, adminID) VALUES(?, ?, ?, ?)";
+            String sql = "INSERT INTO Train (trainID, trainName, trainNumber, adminID, numberOfSeats) VALUES(?, ?, ?, ?, ?)";
             PreparedStatement statement = connection.prepareStatement(sql);
             statement.setInt(1,id);
             statement.setString(2,name);
             statement.setInt(3,num);
             statement.setInt(4,adminID);
+            statement.setInt(5,nos);
             int rowsInserted = statement.executeUpdate();
             if(rowsInserted >= 1)
                 System.out.println("Data inserted successfully.");
@@ -72,7 +75,8 @@ public class Train {
 
         System.out.print("please choose whether to: \n" +
                 "1- Edit Train Number\n"+
-                "2- Edit Train name\n");
+                "2- Edit Train name\n"+
+                "3- Edit Number of Seats\n");
         String sql;
         PreparedStatement statement;
         int subchoice = scanner.nextInt();
@@ -97,6 +101,16 @@ public class Train {
                 statement.setInt(2,id);
                 statement.executeUpdate();
                 break;
+            case 3:
+                System.out.println("Enter number of seats");
+                int n = scanner.nextInt();
+                sql = "UPDATE train set numberOfSeats = ? where trainID = ?";
+                statement = connection.prepareStatement(sql);
+                statement.setInt(1,n);
+                statement.setInt(2,id);
+                statement.executeUpdate();
+                break;
+
         }
     }
 }
