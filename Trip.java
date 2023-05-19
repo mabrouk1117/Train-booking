@@ -11,20 +11,46 @@ import java.time.LocalTime;
 
 public class Trip
 {
-    public Trip(){}
-    public void Add_a_Trip()
-    {
-        String url = "jdbc:mysql://localhost:3306/...";           //replace ... with the name of your DB
-        String username = "...";            //replace ... with ur username on your MySQL
-        String password = "...";            //replace ... with ur Password on your MySQL
-        Scanner sc = new Scanner(System.in);
-        try {
-            Connection connection = DriverManager.getConnection(url, username, password);
+    private Connection connection;
 
+    public Trip(Connection connection) {
+        this.connection = connection;
+    }
+
+    private boolean isTripIDValid(int TripID) throws SQLException {
+        String sql = "SELECT TripID FROM Trip WHERE TripID = ?";
+        PreparedStatement statement = connection.prepareStatement(sql);
+        statement.setInt(1, TripID);
+        ResultSet resultSet = statement.executeQuery();
+        boolean isValid = resultSet.next();
+        resultSet.close();
+        statement.close();
+        return isValid;
+    }
+
+    private boolean isTrainIDValid(int trainID) throws SQLException {
+        String sql = "SELECT TrainID FROM Train WHERE TrainID = ?";
+        PreparedStatement statement = connection.prepareStatement(sql);
+        statement.setInt(1, trainID);
+        ResultSet resultSet = statement.executeQuery();
+        boolean isValid = resultSet.next();
+        resultSet.close();
+        statement.close();
+        return isValid;
+    }
+
+    private void insertTrain(int trainID) throws SQLException {
+        String sql = "INSERT INTO Train (TrainID) VALUES (?)";
+        PreparedStatement statement = connection.prepareStatement(sql);
+        statement.setInt(1, trainID);
+        statement.executeUpdate();
+        statement.close();
+    }
+    public void Add_a_Trip(Scanner scanner)
+    {
+        try {
             String sql = "INSERT INTO Trip (TripID, TrainID, originStation, DestinationStation, DepartureDate, arrivalDate, availableSeats) VALUES (?, ?, ?, ?, ?, ?, ?)";
             PreparedStatement statement = connection.prepareStatement(sql);
-
-            Scanner scanner = new Scanner(System.in);
 
             boolean check = true, check2 = true;
             while (check) {
@@ -46,13 +72,13 @@ public class Trip
                 int trainID = scanner.nextInt();
                 scanner.nextLine();
                 if (trainID > 0) {
-                    if (!isTrainIDValid(trainID, connection)) {
+                    if (!isTrainIDValid(trainID)) {
                         System.out.print("Invalid ID; this Train ID does NOT belong to our system, please choose whether to: " +
                                 "1- Save this Train ID in our system firstly\n" +
                                 "2- Re-enter another ID\n");
                         int choice = scanner.nextInt();
                         if (choice == 1) {
-                            insertTrain(trainID, connection);
+                            insertTrain(trainID);
                             statement.setInt(2, trainID);
                             check2 = false;
                         } else if (choice == 2) {
@@ -129,22 +155,15 @@ public class Trip
         }
     }
 
-    public void Edit_a_Trip()
+    public void Edit_a_Trip(Scanner scanner)
     {
-        String url = "jdbc:mysql://localhost:3306/...";             //replace ... with the name of your DB
-        String username = "...";           //replace ... with ur username on your MySQL
-        String password = "...";          //replace ... with ur Pass on your MySQL
-        Scanner sc = new Scanner(System.in);
         try
-        {
-            Connection connection = DriverManager.getConnection(url, username, password);
-            String sql = "INSERT Trip (TripID, TrainID, originStation, DestinationStation, DepartureDate, arrivalDate, availableSeats) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        {String sql = "INSERT Trip (TripID, TrainID, originStation, DestinationStation, DepartureDate, arrivalDate, availableSeats) VALUES (?, ?, ?, ?, ?, ?, ?)";
             PreparedStatement statement = connection.prepareStatement(sql);
 
-            Scanner scanner = new Scanner(System.in);
             System.out.println("Please enter the Trip ID you want to edit it");
             int DesiredTripID = scanner.nextInt();
-            if (isTripIDValid(DesiredTripID,connection))
+            if (isTripIDValid(DesiredTripID))
             {
                 System.out.print("please choose whether to: " +
                         "1- Edit TrainID\n" +
@@ -167,7 +186,7 @@ public class Trip
                             scanner.nextLine();
                             if (trainID>0)
                             {
-                                if (!isTrainIDValid(trainID, connection))
+                                if (!isTrainIDValid(trainID))
                                 {
                                     System.out.print("Invalid ID; this Train ID does NOT belong to our system, please choose whether to: " +
                                             "1- Save this Train ID in our system firstly\n" +
@@ -175,7 +194,7 @@ public class Trip
                                     int choice=scanner.nextInt();
                                     if (choice==1)
                                     {
-                                        insertTrain(trainID, connection);
+                                        insertTrain(trainID);
                                         statement.setInt(2, trainID);
                                         check2=false;
                                     }
@@ -277,12 +296,6 @@ public class Trip
                         statement4.executeUpdate();
                         statement4.close();
                         break;
-                    case 6:
-                        break;
-                    case 7:
-                        break;
-                    case 8:
-                        break;
                     default:
                         break;
                 }
@@ -300,34 +313,29 @@ public class Trip
         }
     }
 
-    private static boolean isTripIDValid(int TripID, Connection connection) throws SQLException {
-        String sql = "SELECT TripID FROM Trip WHERE TripID = ?";
-        PreparedStatement statement = connection.prepareStatement(sql);
-        statement.setInt(1, TripID);
-        ResultSet resultSet = statement.executeQuery();
-        boolean isValid = resultSet.next();
-        resultSet.close();
-        statement.close();
-        return isValid;
-    }
-
-    private static boolean isTrainIDValid(int trainID, Connection connection) throws SQLException {
-        String sql = "SELECT TrainID FROM Train WHERE TrainID = ?";
-        PreparedStatement statement = connection.prepareStatement(sql);
-        statement.setInt(1, trainID);
-        ResultSet resultSet = statement.executeQuery();
-        boolean isValid = resultSet.next();
-        resultSet.close();
-        statement.close();
-        return isValid;
-    }
-
-    private static void insertTrain(int trainID, Connection connection) throws SQLException {
-        String sql = "INSERT INTO Train (TrainID) VALUES (?)";
-        PreparedStatement statement = connection.prepareStatement(sql);
-        statement.setInt(1, trainID);
-        statement.executeUpdate();
-        statement.close();
+    public void delete_a_trip(Scanner scanner )
+    {
+        try
+        {
+            System.out.println("Please enter the Trip ID you want to delete it: ");
+            int DesiredTripID = scanner.nextInt();
+            if (isTripIDValid(DesiredTripID))
+            {
+                String sql = "DELETE FROM Trip WHERE TripID = ?";
+                PreparedStatement statement2 = connection.prepareStatement(sql);
+                statement2.setInt(1, DesiredTripID);
+                statement2.executeUpdate();
+                statement2.close();
+            }
+            else
+            {
+                System.out.println("Invalid TripID; This ID doesn't exist on our System");
+            }
+            connection.close();
+            scanner.close();
+        }catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
     }
 }
-
