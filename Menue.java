@@ -10,6 +10,8 @@ public class Menue {
     private Update update;
     private Trip trip;
     private Train train;
+    private int CustomerID ;
+    private int AdminID ;
 
 
 
@@ -21,12 +23,14 @@ public class Menue {
         train = new Train(connection);
         trip = new Trip(connection);
         update=null;
+        CustomerID=-1;
+        AdminID=-1;
 
     }
 
-    public void displayMenu() {
+    public boolean displayMenu() {
         try {
-            while (true) {
+            while ( (AdminID == -1)  && (CustomerID == -1)){
                 System.out.println("Welcome to the Booking Train System!");
                 System.out.println("Please choose an option:");
                 System.out.println("1. Sign Up");
@@ -59,53 +63,12 @@ public class Menue {
                         scanner.nextLine();
 
                         if (loginTypeChoice == 1) {
-                            int id=login.loginCustomer(scanner);
-                            System.out.println("1 if You want to update your info");
-                            int c= scanner. nextInt();
-                            switch (c){
-                                case 1:
-                                    update=new Update(connection,id);
-                                    update.edit_customer_info(scanner);
-                                    break;
-                                default:
-                                    System.out.println("Invalid choice");
-                            }
+                            CustomerID = login.loginCustomer(scanner);
                         }
                             //User menu
                          else if (loginTypeChoice == 2) {
                             //Admin Menu
-                            int id;
-                            id=login.loginAdmin(scanner);
-                            System.out.println("1 if you want to Edit Train");
-                            System.out.println("2 if you want to Add Train");
-                            System.out.println("3 if You want to Edit trip");
-                            System.out.println("4 if You want to Add trip");
-                            System.out.println("5 if You want to delete a trip");
-                            System.out.println("6 if You want to update your info");
-                            int c= scanner. nextInt();
-                            switch (c){
-                                case 1:
-                                    train.Edittrain(scanner);
-                                    break;
-                                case 2:
-                                    train.AddTrain(scanner);
-                                    break;
-                                case 3:
-                                    trip.Edit_a_Trip(scanner);
-                                    break;
-                                case 4:
-                                    trip.Add_a_Trip(scanner);
-                                    break;
-                                case 5:
-                                    trip.delete_a_trip(scanner);
-                                    break;
-                                case 6:
-                                    update=new Update(connection,id);
-                                    update.edit_admin_info(scanner);
-                                    break;
-                                default:
-                                    System.out.println("Invalid choice");
-                            }
+                            AdminID=login.loginAdmin(scanner);
                         } else {
                             System.out.println("Invalid choice. Please try again.");
                         }
@@ -113,7 +76,7 @@ public class Menue {
                     case 3:
                         System.out.println("Thank you for using the Booking Train System. Goodbye!");
                         signUp.closeConnection();
-                        return;
+                        return false;
                     default:
                         System.out.println("Invalid choice. Please try again.");
                         break;
@@ -122,5 +85,75 @@ public class Menue {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        try {
+            while(CustomerID != -1){
+                System.out.println("Welcome to the Booking Train System!");
+                System.out.println("Please choose an option:");
+                System.out.println("1. view available trips");
+                System.out.println("2. book a trip");
+                System.out.println("3. cancel the trip");
+                System.out.println("4 if You want to update your info");
+                System.out.println("5. log out");
+                int choice = scanner.nextInt();
+                scanner.nextLine();
+                customer c = new customer(connection) ;
+                switch (choice) {
+                    case 1:
+                        c.viewTrips(CustomerID) ;
+                        break;
+                    case 2:
+                        c.Booking(CustomerID , scanner) ;
+                        break;
+                    case 3:
+                        c.cancel(CustomerID, scanner) ;
+                        break;
+                    case 4:
+                        update=new Update(connection,CustomerID);
+                        update.edit_customer_info(scanner);
+                        break;
+                    case 5:
+                        CustomerID = -1 ;
+                        break;
+                    default:
+                        System.out.println("Invalid choice. Please try again.");
+                        break;
+                }
+            }
+            while (AdminID!=-1){
+                System.out.println("1 if you want to Edit Train");
+                System.out.println("2 if you want to Add Train");
+                System.out.println("3 if You want to Edit trip");
+                System.out.println("4 if You want to Add trip");
+                System.out.println("5 if You want to delete a trip");
+                System.out.println("6 if You want to update your info");
+                int c= scanner. nextInt();
+                switch (c){
+                    case 1:
+                        train.Edittrain(scanner);
+                        break;
+                    case 2:
+                        train.AddTrain(scanner);
+                        break;
+                    case 3:
+                        trip.Edit_a_Trip(scanner);
+                        break;
+                    case 4:
+                        trip.Add_a_Trip(scanner);
+                        break;
+                    case 5:
+                        trip.delete_a_trip(scanner);
+                        break;
+                    case 6:
+                        update=new Update(connection,AdminID);
+                        update.edit_admin_info(scanner);
+                        break;
+                    default:
+                        System.out.println("Invalid choice");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return true;
     }
 }
