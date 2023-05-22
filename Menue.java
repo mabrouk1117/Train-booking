@@ -1,7 +1,6 @@
-
 import java.sql.*;
 import java.util.Scanner;
-
+import java.sql.Statement;
 public class Menue {
     private Scanner scanner;
     private Connection connection;
@@ -12,6 +11,7 @@ public class Menue {
     private Train train;
     private int CustomerID ;
     private int AdminID ;
+    private ReportGenerator Report;
 
 
 
@@ -22,6 +22,7 @@ public class Menue {
         signUp = new SignUp(connection);
         train = new Train(connection);
         trip = new Trip(connection);
+        Report=new ReportGenerator(connection);
         update=null;
         CustomerID=-1;
         AdminID=-1;
@@ -65,8 +66,8 @@ public class Menue {
                         if (loginTypeChoice == 1) {
                             CustomerID = login.loginCustomer(scanner);
                         }
-                            //User menu
-                         else if (loginTypeChoice == 2) {
+                        //User menu
+                        else if (loginTypeChoice == 2) {
                             //Admin Menu
                             AdminID=login.loginAdmin(scanner);
                         } else {
@@ -120,25 +121,28 @@ public class Menue {
                 }
             }
             while (AdminID!=-1){
-                System.out.println("1 if you want to Edit Train");
-                System.out.println("2 if you want to Add Train");
-                System.out.println("3 if You want to Edit trip");
-                System.out.println("4 if You want to Add trip");
-                System.out.println("5 if You want to delete a trip");
-                System.out.println("6 if You want to update your info");
+                System.out.println("Please choose an option:");
+                System.out.println("1. Edit Train");
+                System.out.println("2. Add Train");
+                System.out.println("3. Edit Trip");
+                System.out.println("4. Add Trip");
+                System.out.println("5. Delete a Trip");
+                System.out.println("6. Update your info");
+                System.out.println("7. Total Trips");
+                System.out.println("8. Log Out");
                 int c= scanner. nextInt();
                 switch (c){
                     case 1:
                         train.Edittrain(scanner);
                         break;
                     case 2:
-                        train.AddTrain(scanner);
+                        train.AddTrain(scanner,AdminID);
                         break;
                     case 3:
-                        trip.Edit_a_Trip(scanner);
+                        trip.Edit_a_Trip(scanner,AdminID);
                         break;
                     case 4:
-                        trip.Add_a_Trip(scanner);
+                        trip.Add_a_Trip(scanner,AdminID);
                         break;
                     case 5:
                         trip.delete_a_trip(scanner);
@@ -147,6 +151,14 @@ public class Menue {
                         update=new Update(connection,AdminID);
                         update.edit_admin_info(scanner);
                         break;
+                    case 7:
+                        Report.generateTripReport();
+                        break;
+                    case 8:
+                        AdminID = -1;
+                        break;
+                    case 9:
+                        return true;
                     default:
                         System.out.println("Invalid choice");
                 }
