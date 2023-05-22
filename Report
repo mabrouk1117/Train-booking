@@ -1,0 +1,40 @@
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+public class ReportGenerator {
+    private Connection connection;
+
+    public ReportGenerator(Connection connection) {
+        this.connection = connection;
+    }
+
+    public void generateReport() throws SQLException {
+        Statement statement = connection.createStatement();
+
+        // Generate report for trains
+        String trainQuery = "SELECT COUNT(*) AS totalTrains FROM Train";
+        ResultSet trainResultSet = statement.executeQuery(trainQuery);
+
+        if (trainResultSet.next()) {
+            int totalTrains = trainResultSet.getInt("totalTrains");
+            System.out.println("Total number of trains: " + totalTrains);
+        } else {
+            System.out.println("No trains found.");
+        }
+
+        // Generate report for trips
+        String tripQuery = "SELECT COUNT(*) AS totalTrips FROM Trip";
+        ResultSet tripResultSet = statement.executeQuery(tripQuery);
+
+        if (tripResultSet.next()) {
+            int totalTrips = tripResultSet.getInt("totalTrips");
+            System.out.println("Total number of trips: " + totalTrips);
+        } else {
+            System.out.println("No trips found.");
+        }
+
+        statement.close();
+    }
+}
