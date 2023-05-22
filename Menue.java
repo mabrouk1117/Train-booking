@@ -128,7 +128,7 @@ public class Menue {
                 System.out.println("4. Add Trip");
                 System.out.println("5. Delete a Trip");
                 System.out.println("6. Update your info");
-                System.out.println("7. Total Trips");
+                System.out.println("7. Report");
                 System.out.println("8. Log Out");
                 int c= scanner. nextInt();
                 switch (c){
@@ -152,7 +152,7 @@ public class Menue {
                         update.edit_admin_info(scanner);
                         break;
                     case 7:
-                        Report.generateTripReport();
+                        Report.generateReport();
                         break;
                     case 8:
                         AdminID = -1;
