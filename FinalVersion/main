@@ -1,0 +1,19 @@
+import java.sql.*;
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        String url = "jdbc:mysql://localhost:3306/...";   //write your url
+        String username = "...";        //write your username
+        String password = "...#";      //write your pass
+
+        try {
+            Connection connection = DriverManager.getConnection(url, username, password);
+            Menue m = new Menue(connection);
+            m.displayMenu();
+            connection.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+}
