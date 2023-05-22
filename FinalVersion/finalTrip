@@ -1,0 +1,398 @@
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.Scanner;
+import java.sql.ResultSet;
+import java.time.LocalDate;
+import java.time.LocalTime;
+
+public class Trip
+{
+    private Connection connection;
+
+    public Trip(Connection connection) {
+        this.connection = connection;
+    }
+
+    private boolean isTripIDValid(int TripID) throws SQLException {
+        String sql = "SELECT TripID FROM Trip WHERE TripID = ?";
+        PreparedStatement statement = connection.prepareStatement(sql);
+        statement.setInt(1, TripID);
+        ResultSet resultSet = statement.executeQuery();
+        boolean isValid = resultSet.next();
+        resultSet.close();
+        statement.close();
+        return isValid;
+    }
+
+    private boolean isTrainIDValid(int trainID) throws SQLException {
+        String sql = "SELECT TrainID FROM Train WHERE TrainID = ?";
+        PreparedStatement statement = connection.prepareStatement(sql);
+        statement.setInt(1, trainID);
+        ResultSet resultSet = statement.executeQuery();
+        boolean isValid = resultSet.next();
+        resultSet.close();
+        statement.close();
+        return isValid;
+    }
+
+
+    private int getNumOfSeats(int trainID) throws SQLException {
+        String sql = "SELECT numberOfSeats FROM Train WHERE TrainID = ?";
+        PreparedStatement statement = connection.prepareStatement(sql);
+        statement.setInt(1, trainID);
+        ResultSet resultSet = statement.executeQuery();
+        int numOfSeats = 0;
+        if (resultSet.next()) {
+            numOfSeats = resultSet.getInt("numberOfSeats");
+        }
+        resultSet.close();
+        statement.close();
+        return numOfSeats;
+    }
+    private void insertTrain(int trainID) throws SQLException {
+        String sql = "INSERT INTO Train (TrainID) VALUES (?)";
+        PreparedStatement statement = connection.prepareStatement(sql);
+        statement.setInt(1, trainID);
+        statement.executeUpdate();
+        statement.close();
+    }
+
+
+    private int TripSeats(int tripID) throws SQLException {
+        String sql = "SELECT trainID FROM Trip WHERE tripID = ?";
+        PreparedStatement statement = connection.prepareStatement(sql);
+        statement.setInt(1, tripID);
+        ResultSet resultSet = statement.executeQuery();
+
+        int trainID = 0; // Initialize the variable to hold the number of seats
+
+        if (resultSet.next()) {
+            trainID = resultSet.getInt("trainID"); // Get the value from the resultSet
+        }
+        resultSet.close();
+        statement.close();
+        int TrainSeats= getNumOfSeats(trainID);
+
+        return TrainSeats;
+    }
+
+    public void Add_a_Trip(Scanner scanner,int AdminID)
+    {
+        int GlobalTripID=0,GlobalTrainID=0;
+        String GlobalOriginSt,GlobalDestSt;
+        Timestamp GlobalDepDate,GlobalArrivalDate;
+        try {
+            String sql = "INSERT INTO Trip (TripID, TrainID, originStation, DestinationStation, DepartureDate, arrivalDate, availableSeats , adminID) VALUES (?, ?, ?, ?, ?, ?, ? ,?)";
+            PreparedStatement statement = connection.prepareStatement(sql);
+
+            boolean check = true, check2 = true,checkSeat=true;
+            while (check) {
+                System.out.print("Please enter enter you trip's ID: ");
+                int tripID = scanner.nextInt();
+                scanner.nextLine();
+                if (tripID > 0) {
+                    if(!isTripIDValid(tripID))
+                    {
+                        statement.setInt(1, tripID);
+                        GlobalTripID=tripID;
+                        check = false;
+                    }
+                    else
+                    {
+                            System.out.println("Trip Id id already used ");
+                            continue;
+                    }
+                } else {
+                    System.out.print("Invalid ID; ID MUST be Positive,Please enter again your Trip ID: ");
+                    continue;
+                }
+            }
+
+
+            while (check2) {
+                System.out.print("Please enter enter your Train's ID: ");
+                int trainID = scanner.nextInt();
+                scanner.nextLine();
+                if (trainID > 0) {
+                    if (!isTrainIDValid(trainID))
+                    {
+                        System.out.print("Invalid ID; this Train ID does NOT belong to our system, ");
+                        continue;
+                    } else {
+                        statement.setInt(2, trainID);
+                        GlobalTrainID=trainID;
+                        check2 = false;
+                    }
+                } else {
+                    System.out.print("Invalid ID; ID MUST be Positive,Please enter again your Train ID: ");
+                    continue;
+                }
+            }
+
+            System.out.print("Enter Origin Station: ");
+            String origin = scanner.nextLine();
+            statement.setString(3, origin);
+            GlobalOriginSt=origin;
+
+            System.out.print("Enter Destination Station: ");
+            String destination = scanner.nextLine();
+            statement.setString(4, destination);
+            GlobalDestSt=destination;
+
+
+            while (true) {
+                System.out.print("Enter Departure Date and Time (YYYY-MM-DD HH:mm:ss): ");
+                String departureDateTime = scanner.nextLine();
+                Timestamp departureTimestamp = Timestamp.valueOf(departureDateTime);
+                statement.setTimestamp(5, departureTimestamp);
+                GlobalDepDate=departureTimestamp;
+
+                System.out.print("Enter Arrival Date and Time (YYYY-MM-DD HH:mm:ss): ");
+                String arrivalDateTime = scanner.nextLine();
+                Timestamp arrivalTimestamp = Timestamp.valueOf(arrivalDateTime);
+
+                LocalDate departureDate = departureTimestamp.toLocalDateTime().toLocalDate();
+                LocalDate arrivalDate = arrivalTimestamp.toLocalDateTime().toLocalDate();
+
+                if (arrivalDate.isBefore(departureDate)) {
+                    System.out.println("Invalid arrival date. Arrival date MUST be on OR after the departure date. Please enter again.");
+                    continue;
+                }
+                LocalTime departureTime = departureTimestamp.toLocalDateTime().toLocalTime();
+                LocalTime arrivalTime = arrivalTimestamp.toLocalDateTime().toLocalTime();
+
+                if (arrivalDate.isEqual(departureDate) && (arrivalTime.isBefore(departureTime) || arrivalTime.equals(departureTime))) {
+                    System.out.println("Invalid arrival time. Arrival time MUST be after the departure time. Please enter again.");
+                    continue;
+                }
+
+                statement.setTimestamp(6, arrivalTimestamp);
+                GlobalArrivalDate=arrivalTimestamp;
+                break;
+            }
+
+
+
+            while (checkSeat)
+            {
+                System.out.print("Enter Available Seats: ");
+                int availableSeats = scanner.nextInt();
+                scanner.nextLine();
+                if (availableSeats>0)
+                {
+                    if (availableSeats>getNumOfSeats(GlobalTrainID))
+                    {
+                        System.out.println("your train can't hold this number of seats, your train has  Only " + getNumOfSeats(GlobalTrainID) + " Seats");
+                        continue;
+                    }
+                    else if (availableSeats<=getNumOfSeats(GlobalTrainID))
+                    {
+                        statement.setInt(7, availableSeats);
+                        checkSeat=false;
+                    }
+                }
+                else
+                {
+                    System.out.print("Invalid Number of Seats; Number of Seats MUST be Positive,Please enter again your Trip  Number of Seats: ");
+                    continue;
+                }
+            }
+
+            statement.setInt(8,AdminID);
+            int rowsInserted = statement.executeUpdate();
+
+            if (rowsInserted > 0) {
+                System.out.println("Trip added successfully!");
+            } else {
+                System.out.println("Failed to add the Trip.");
+            }
+
+            statement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void Edit_a_Trip(Scanner scanner,int AdminID)
+    {
+        try
+        {String sql = "INSERT Trip (TripID, TrainID, originStation, DestinationStation, DepartureDate, arrivalDate, availableSeats, adminID) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            PreparedStatement statement = connection.prepareStatement(sql);
+            System.out.println("Please enter the Trip ID you want to edit it");
+            int DesiredTripID = scanner.nextInt();
+            if (isTripIDValid(DesiredTripID))
+            {
+                System.out.print("please choose whether to: " +
+                        "1- Edit TrainID\n" +
+                        "2- Edit Origin Station\n" +
+                        "3- Edit Destination Station\n"+
+                        "4- Edit DepartureDate or ArrivalDate\n"+
+                        "5- Edit Number Of Available Seats\n");
+                int subchoice=scanner.nextInt();
+                scanner.nextLine();
+                switch (subchoice)
+                {
+                    case 1:
+                        boolean check2=true;
+                        while (check2)
+                        {
+                            System.out.print("Please enter enter your Train's ID: ");
+                            sql = "UPDATE Trip SET TrainID = ? WHERE TripID = ?";
+                            int trainID = scanner.nextInt();
+                            PreparedStatement statement1 = connection.prepareStatement(sql);
+                            scanner.nextLine();
+                            if (trainID>0)
+                            {
+                                if (!isTrainIDValid(trainID))
+                                {
+                                    System.out.print("Invalid ID; this Train ID does NOT belong to our system, " );
+                                    continue;
+
+                                }
+                                else
+                                {
+                                    statement1.setInt(1, trainID);
+                                    statement1.setInt(2, DesiredTripID);
+                                    statement1.executeUpdate();
+                                    statement1.close();
+                                    System.out.print("Train ID was Updated Successfully " );
+                                    check2=false;
+                                }
+                            }
+                            else
+                            {
+                                System.out.print("Invalid ID; ID MUST be Positive,Please enter again your Trip ID: ");
+                                continue;
+                            }
+                        }
+                        break;
+                    case 2:
+                        System.out.print("Enter new Origin Station: ");
+                        String neworigin = scanner.nextLine();
+                        sql = "UPDATE Trip SET originStation = ? WHERE TripID = ?";
+                        PreparedStatement statement2 = connection.prepareStatement(sql);
+                        statement2.setString(1, neworigin);
+                        statement2.setInt(2, DesiredTripID);
+                        statement2.executeUpdate();
+                        statement2.close();
+                        System.out.print("Origin Station was Updated Successfully " );
+                        break;
+                    case 3:
+                        System.out.print("Enter new Destination Station: ");
+                        String newDest = scanner.nextLine();
+                        sql = "UPDATE Trip SET DestinationStation = ? WHERE TripID = ?";
+                        PreparedStatement statement3 = connection.prepareStatement(sql);
+                        statement3.setString(1, newDest);
+                        statement3.setInt(2, DesiredTripID);
+                        statement3.executeUpdate();
+                        statement3.close();
+                        System.out.print("Destination Station was Updated Successfully " );
+                        break;
+                    case 4:
+                        while (true)
+                        {
+                            System.out.print("Enter Departure Date and Time (YYYY-MM-DD HH:mm:ss): ");
+                            String departureDateTime = scanner.nextLine();
+                            sql = "UPDATE Trip SET DepartureDate = ? WHERE TripID = ?";
+                            PreparedStatement statement4 = connection.prepareStatement(sql);
+                            Timestamp NewdepartureTimestamp = Timestamp.valueOf(departureDateTime);
+
+                            System.out.print("Enter Arrival Date and Time (YYYY-MM-DD HH:mm:ss): ");
+                            String arrivalDateTime = scanner.nextLine();
+                            sql = "UPDATE Trip SET arrivalDate = ? WHERE TripID = ?";
+                            PreparedStatement statement5 = connection.prepareStatement(sql);
+                            Timestamp arrivalTimestamp = Timestamp.valueOf(arrivalDateTime);
+
+                            LocalDate departureDate = NewdepartureTimestamp.toLocalDateTime().toLocalDate();
+                            LocalDate arrivalDate = arrivalTimestamp.toLocalDateTime().toLocalDate();
+
+                            if (arrivalDate.isBefore(departureDate))
+                            {
+                                System.out.println("Invalid arrival date. Arrival date MUST be on OR after the departure date. Please enter again.");
+                                continue;
+                            }
+                            LocalTime departureTime = NewdepartureTimestamp.toLocalDateTime().toLocalTime();
+                            LocalTime arrivalTime = arrivalTimestamp.toLocalDateTime().toLocalTime();
+
+                            if (arrivalDate.isEqual(departureDate) && (arrivalTime.isBefore(departureTime) || arrivalTime.equals(departureTime))) {
+                                System.out.println("Invalid arrival time. Arrival time MUST be after the departure time. Please enter again.");
+                                continue;
+                            }
+                            statement4.setTimestamp(1, NewdepartureTimestamp);
+                            statement4.setInt(2, DesiredTripID);
+                            statement4.executeUpdate();
+                            statement4.close();
+
+                            statement5.setTimestamp(1, NewdepartureTimestamp);
+                            statement5.setInt(2, DesiredTripID);
+                            statement5.executeUpdate();
+                            statement5.close();
+                            System.out.print("Dates were Updated Successfully " );
+                            break;
+                        }
+                        break;
+                    case 5:
+                        while (true)
+                        {
+                            System.out.print("Enter New Available Seats: ");
+                            int newavailableSeats = scanner.nextInt();
+                            sql = "UPDATE Trip SET availableSeats = ? WHERE TripID = ?";
+                            if (newavailableSeats>TripSeats(DesiredTripID))
+                            {
+                                System.out.println("your train can't hold this number of seats, your train has  Only " + TripSeats(DesiredTripID) + " Seats");
+                                continue;
+                            }
+                            PreparedStatement statement4 = connection.prepareStatement(sql);
+                            statement4.setInt(1, newavailableSeats);
+                            statement4.setInt(2, DesiredTripID);
+                            statement4.executeUpdate();
+                            statement4.close();
+                            System.out.print("Seats Updated Successfully " );
+                            break;
+
+                        }
+                        break;
+                    default:
+                        break;
+                }
+                statement.setInt(8,AdminID);
+            }
+            else
+            {
+                System.out.println("Invalid TripID; This ID doesn't exist on our System");
+            }
+            statement.close();
+        }catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public void delete_a_trip(Scanner scanner )
+    {
+        try
+        {
+            System.out.println("Please enter the Trip ID you want to delete it: ");
+            int DesiredTripID = scanner.nextInt();
+            if (isTripIDValid(DesiredTripID))
+            {
+                String sql = "DELETE FROM Trip WHERE TripID = ?";
+                PreparedStatement statement2 = connection.prepareStatement(sql);
+                statement2.setInt(1, DesiredTripID);
+                statement2.executeUpdate();
+                statement2.close();
+                System.out.print("Your Trip was Deleted Successfully " );
+            }
+            else
+            {
+                System.out.println("Invalid TripID; This ID doesn't exist on our System");
+            }
+        }catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+    }
+}
